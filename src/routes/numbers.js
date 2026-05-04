@@ -129,7 +129,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       Readable.from(req.file.buffer)
         .pipe(csvParser())
         .on("data", (row) => {
-          const num = row.phone_number?.trim();
+          const num = row.phone?.trim();
           if (num) results.push({ phone_number: num });
         })
         .on("end", () => resolve(results))

@@ -7,9 +7,19 @@ export const client = new RestClient(
   { signalwireSpaceUrl: process.env.SIGNALWIRE_SPACE_URL },
 );
 
+/** Malaysia E.164 must not include the national trunk 0 after +60 (e.g. +6004… → +604…). */
+function normalizeToNumber(toNumber) {
+  if (typeof toNumber !== "string" || !/^\+600\d/.test(toNumber)) return toNumber;
+  return `+60${toNumber.slice(4)}`;
+}
+
 export async function makeCall(toNumber) {
+  const to = normalizeToNumber(toNumber);
+  if (to !== toNumber) {
+    console.log(`[SIGNALWIRE] Normalized ${toNumber} → ${to}`);
+  }
   return client.calls.create({
-    to: toNumber,
+    to,
     from: process.env.CALLER_NUMBER,
     url: `${process.env.WEBHOOK_BASE_URL}/webhook/twiml`,
     statusCallback: process.env.WEBHOOK_URL, // your Supabase edge function
